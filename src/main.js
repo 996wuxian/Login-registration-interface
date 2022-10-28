@@ -2,12 +2,13 @@ const Koa = require('koa')
 
 // 获取config拿到的.env配置的值
 const { APP_PORT } = require('./config/config.default')
+// 导入路由中间件
+const userRouter = require('./router/user.route')
 
 const app = new Koa()
 
-app.use((ctx,next) => {
-  ctx.body = 'hello'
-})
+// 使用中间件
+app.use(userRouter.routes())
 
 // 使用config里面拿到的.env配置的值
 app.listen(APP_PORT, () => {
