@@ -43,8 +43,26 @@ const verifyUser = async (ctx, next) => {
   await next()
 }
 
+// 导入bcryptjs包
+const bcrypt = require('bcryptjs')
+
+// 加密函数
+const crpytPassword = async (ctx, next) => {
+  // 先拿到body里的明文密码
+  const { password } = ctx.request.body
+  // 生成盐加密，10次
+  const salt = bcrypt.genSaltSync(10)
+  // 再将salt 用哈希加密password，hash保存的是密文
+  const hash = bcrypt.hashSync(password, salt)
+
+  ctx.request.body.password = hash
+
+  await next()
+}
+
 // 导出到user,route.js里
 module.exports = {
   userValidator,
-  verifyUser
+  verifyUser,
+  crpytPassword
 }
