@@ -1,23 +1,29 @@
 const { createUser } = require('../service/user.service')
 
+// 导入错误类型
+const { userRegisterError } = require('../constant/err.type')
+
 class UserController {
   // 注册方法
   async register(ctx,next) {
     // 1 获取数据
     const { user_name, password } = ctx.request.body
-    // 在操作数据库之前,对获取到的数据进行合法性和合理性的校验
-
-    // 2 操作数据库
-    const res = await createUser(user_name, password)
-    // console.log(res);
-    // 3 返回结果
-    ctx.body = {
-      code: 0,
-      message: '用户注册成功',
-      result: {
-        id: res.id,
-        user_name: res.user_name
+    try {
+      // 2 操作数据库
+      const res = await createUser(user_name, password)
+      // console.log(res);
+      // 3 返回结果
+      ctx.body = {
+        code: 0,
+        message: '用户注册成功',
+        result: {
+          id: res.id,
+          user_name: res.user_name
+        }
       }
+    } catch (err) {
+      console.log(err)
+      ctx.app.emit('error', userRegisterError, ctx)
     }
   }
   // 登录方法
