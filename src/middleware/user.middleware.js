@@ -1,5 +1,5 @@
 // 导入错误处理
-const { userFormateError, userAlreadyExited } = require('../constant/err.type')
+const { userFormateError, userAlreadyExited, userDoesNotExist, userLoginError, invalidPasswordError } = require('../constant/err.type')
 // 校验合法性
 const userValidator = async (ctx, next) => {
 
@@ -45,7 +45,6 @@ const verifyUser = async (ctx, next) => {
 
 // 导入bcryptjs包
 const bcrypt = require('bcryptjs')
-
 // 加密函数
 const crpytPassword = async (ctx, next) => {
   // 先拿到body里的明文密码
@@ -60,9 +59,38 @@ const crpytPassword = async (ctx, next) => {
   await next()
 }
 
+// 验证用户登录
+const verifyLogin = async (ctx, next) => {
+  // 判断用户是否存在(不存在:报错)
+  const { user_name, password } = ctx.request.body
+  
+  try {
+    const res = await getUserInfo( { user_name } )
+
+    if (!res) {
+      console.error('用户名不存在', { user_name })
+      ctx.app.emit('error', userDoesNotExist, ctx)
+      return
+    }
+
+    // 比对密码是否匹配(不匹配:报错)
+    // 如果这两个密码不匹配，一个是用户输入的密码，一个是数据库里的密码
+    if (!bcrypt.compareSync(password, res.password)) {
+      ctx.app.emit('error',invalidPasswordError, ctx)
+      return
+    }
+    await next()
+
+  } catch (err) {
+    console.error(err)
+    return ctx.app.emit('error', userLoginError, ctx)
+  }
+}
+
 // 导出到user,route.js里
 module.exports = {
   userValidator,
   verifyUser,
-  crpytPassword
+  crpytPassword,
+  verifyLogin
 }

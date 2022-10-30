@@ -28,7 +28,8 @@ class UserController {
   }
   // 登录方法
   async login(ctx,next) {
-    ctx.body = '用户登录成功'
+    const { user_name } = ctx.request.body
+    ctx.body = `用户${ user_name }登录成功`
   }
 }
 
